@@ -14,7 +14,7 @@ CONTENTTAG="{mp:content}"
 DEPENDENCIES="markdown"
 for i in $DEPENDENCIES
 do
-	type $i &>/dev/null && continue || { echo "Markdown not found. Please install markdown"; exit; }
+	type $i &>/dev/null && continue || { echo "$i not found. Please install it"; exit; }
 done
 
 # read arguments (-t, -a)
@@ -42,8 +42,8 @@ then
 	exit;
 fi
 
-TEMPLATE_PATH="${TEMPLATES}/v1/template.html"
-ARTICLE_PATH="${ARTICLES}/test"
+TEMPLATE_PATH="${TEMPLATES}/${TEMPLATE_ARG}/template.html"
+ARTICLE_PATH="${ARTICLES}/${ARTICLE_ARG}"
 ARTICLE_INPUT="${ARTICLE_PATH}/index.md"
 
 # verify argument paths exist/valid
@@ -68,6 +68,10 @@ TEMPLATE_DATA=$(<${TEMPLATE_PATH})
 # convert markdown to html
 CONVERTED_ARTICLE_OUTPUT="<section>$(markdown $ARTICLE_INPUT)</section>"
 
+# retrieve the title of the article (the first h1 element)
+TITLE=`echo "${CONVERTED_ARTICLE_OUTPUT}" | sed -n "s/.*<h1>\([^<]*\)<\/h1>.*/\1/p"`
+echo "Title seems to be *${TITLE}*"
+
 # create a timestamp
 DATE=`date --rfc-822`
 PUBDATE="<time datetime=\"${DATE}\">${DATE}</time>"
@@ -86,5 +90,8 @@ FULL_ARTICLE=${TEMPLATE_DATA/$CONTENTTAG/$CONVERTED_ARTICLE_OUTPUT}
 echo "${FULL_ARTICLE}" > "${ARTICLE_PATH}/index.html"
 
 echo "Article created at ${ARTICLE_PATH}/index.html"
+
+#TODO
+#echo "Added ${TITLE} to site index"
 
 exit 0;
